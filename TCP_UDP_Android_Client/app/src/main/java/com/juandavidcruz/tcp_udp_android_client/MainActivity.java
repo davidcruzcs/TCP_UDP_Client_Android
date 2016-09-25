@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity implements
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
 
-    public int threadQuantity = 2;
+    public int threadQuantity = 100;
 
 
 
@@ -100,6 +100,10 @@ public class MainActivity extends AppCompatActivity implements
 
                     run = true;
                     fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_media_pause));
+
+                    EditText textNumberThreads = (EditText)findViewById(R.id.textNumberThreads);
+                    threadQuantity = Integer.parseInt(textNumberThreads.getText().toString());
+
 
                     for (int i = 0; i < threadQuantity; i++) {
                         ClientThread newClient = new ClientThread();

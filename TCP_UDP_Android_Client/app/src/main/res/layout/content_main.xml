@@ -55,9 +55,9 @@
         android:id="@+id/textView2"
         android:layout_below="@+id/radioGroup"
         android:layout_marginTop="10dp"
-        android:layout_alignParentEnd="true"
         android:layout_alignParentStart="true"
-        android:text="IP Destino:" />
+        android:text="IP Destino:"
+        android:layout_alignEnd="@+id/textIP" />
 
     <EditText
         android:layout_width="wrap_content"
@@ -66,8 +66,8 @@
         android:id="@+id/textIP"
         android:layout_below="@+id/textView2"
         android:layout_alignParentStart="true"
-        android:layout_alignParentEnd="true"
-        android:inputType="text" />
+        android:inputType="text"
+        android:layout_toStartOf="@+id/textView3" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -75,9 +75,8 @@
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:text="Puerto Destino"
         android:id="@+id/textView3"
-        android:layout_below="@+id/textIP"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_above="@+id/textPuerto"
+        android:layout_alignEnd="@+id/radioGroup" />
 
     <EditText
         android:layout_width="wrap_content"
@@ -85,18 +84,19 @@
         android:inputType="text"
         android:ems="10"
         android:id="@+id/textPuerto"
-        android:layout_below="@+id/textView3"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_below="@+id/textView2"
+        android:layout_alignEnd="@+id/textNumberThreads"
+        android:layout_toEndOf="@+id/textView3"
+        android:layout_alignStart="@+id/textView3" />
 
     <ScrollView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/scrollView"
-        android:layout_below="@+id/textPuerto"
         android:layout_alignParentStart="true"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true" >
+        android:layout_alignParentEnd="true"
+        android:layout_below="@+id/textNumberThreads">
 
         <TextView
             android:layout_width="match_parent"
@@ -106,6 +106,25 @@
             android:id="@+id/textViewResults" />
 
     </ScrollView>
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:ems="10"
+        android:id="@+id/textNumberThreads"
+        android:layout_below="@+id/textView4"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="# Threads"
+        android:id="@+id/textView4"
+        android:layout_below="@+id/textPuerto"
+        android:layout_alignParentStart="true" />
 
 
 </RelativeLayout>
