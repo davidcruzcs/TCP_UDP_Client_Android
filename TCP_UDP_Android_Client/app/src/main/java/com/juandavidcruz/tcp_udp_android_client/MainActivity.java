@@ -41,6 +41,10 @@ public class MainActivity extends AppCompatActivity implements
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
 
+    public int threadQuantity = 2;
+
+
+
     public String connectionMode = "TCP";
 
     private Socket socket;
@@ -56,7 +60,6 @@ public class MainActivity extends AppCompatActivity implements
 
     public  GoogleApiClient mGoogleApiClient;
 
-    public ClientThread connectionThread;
 
     public TextView resultsTextView;
 
@@ -66,8 +69,6 @@ public class MainActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        connectionThread = new ClientThread();
 
         resultsTextView = (TextView)findViewById(R.id.textViewResults);
 
@@ -100,7 +101,12 @@ public class MainActivity extends AppCompatActivity implements
                     run = true;
                     fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_media_pause));
 
-                    new Thread(connectionThread).start();
+                    for (int i = 0; i < threadQuantity; i++) {
+                        ClientThread newClient = new ClientThread();
+                        newClient.setId(i);
+                        new Thread(newClient).start();
+                    }
+
                 } else {
                     resultsTextView.append("Preparado el cierre de la conexión \n");
                     run = false;
@@ -204,7 +210,7 @@ public class MainActivity extends AppCompatActivity implements
         return super.onOptionsItemSelected(item);
     }
 
-    public void sendLocationToPrintWriter(final PrintWriter pOut ) {
+    public void sendLocationToPrintWriter(final PrintWriter pOut, final int pThreadID ) {
 
 
             final Timer timer = new Timer();
@@ -218,11 +224,12 @@ public class MainActivity extends AppCompatActivity implements
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                resultsTextView.append("Enviando Localización: "+ deviceLocation +" \n");
+                                resultsTextView.append("Enviando Localización: "+ deviceLocation +" (Thread ID: "+ pThreadID +")"+"\n");
                             }
                         });
 
                         pOut.println(deviceLocation);
+                        pOut.println(pThreadID+"");
                     } else {
 
                         pOut.println("Bye");
@@ -231,7 +238,7 @@ public class MainActivity extends AppCompatActivity implements
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    resultsTextView.append("Conexión TCP Cerrada \n");
+                                    resultsTextView.append("Conexión TCP Cerrada (Thread ID: "+ pThreadID +")"+"\n");
                                 }
                             });
                             timer.cancel();
@@ -239,7 +246,7 @@ public class MainActivity extends AppCompatActivity implements
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    resultsTextView.append("Error al cerrar conexión: " + e.getMessage() + "\n");
+                                    resultsTextView.append("Error al cerrar conexión: " + e.getMessage() + " (Thread ID: "+ pThreadID +")"+"\n");
                                 }
                             });
                             timer.cancel();
@@ -253,7 +260,7 @@ public class MainActivity extends AppCompatActivity implements
 
     }
 
-    public void sendLocationToUDPSocket(final DatagramSocket pSocket, final InetAddress pAddress, final int pPort) {
+    public void sendLocationToUDPSocket(final DatagramSocket pSocket, final InetAddress pAddress, final int pPort, final int pThreadID) {
         final Timer timer = new Timer();
         timer.schedule(new TimerTask() {
 
@@ -263,11 +270,11 @@ public class MainActivity extends AppCompatActivity implements
                 if (run == true) {
                     try {
 
-                        final String str = getDeviceLocation();
+                        final String str = getDeviceLocation() + "|" + pThreadID;
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                resultsTextView.append("Enviando Localización: "+ str +" \n");
+                                resultsTextView.append("Enviando Localización: "+ str +" (Thread ID: "+ pThreadID +")"+"\n");
                             }
                         });
 
@@ -278,7 +285,7 @@ public class MainActivity extends AppCompatActivity implements
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                resultsTextView.append("Error al enviar Localización: "+ e.getMessage() +" \n");
+                                resultsTextView.append("Error al enviar Localización: "+ e.getMessage() +" (Thread ID: "+ pThreadID +")"+"\n");
                             }
                         });
 
@@ -289,7 +296,7 @@ public class MainActivity extends AppCompatActivity implements
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            resultsTextView.append("Conexión UDP Cerrada \n");
+                            resultsTextView.append("Conexión UDP Cerrada (Thread ID: "+ pThreadID +")"+"\n");
                         }
                     });
                     timer.cancel();
@@ -304,6 +311,12 @@ public class MainActivity extends AppCompatActivity implements
 
     class ClientThread implements Runnable {
 
+        public int id;
+
+        public void setId(int pID) {
+            id = pID;
+        }
+
         @Override
         public void run() {
 
@@ -312,7 +325,7 @@ public class MainActivity extends AppCompatActivity implements
                     @Override
                     public void run() {
                         resultsTextView.setText("");
-                        resultsTextView.append("Creando conexión UDP al Servidor: " + serverIP+":"+serverPort + "\n");
+                        resultsTextView.append("Creando conexión UDP al Servidor: " + serverIP+":"+serverPort + " (Thread ID: "+ id +")"+"\n");
                     }
                 });
 
@@ -322,11 +335,11 @@ public class MainActivity extends AppCompatActivity implements
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            resultsTextView.append("Preparando envio de localización del dispositivo");
+                            resultsTextView.append("Preparando envio de localización del dispositivo" + " (Thread ID: "+ id +")"+"\n");
                         }
                     });
 
-                    sendLocationToUDPSocket(client_socket, IPAddress, Integer.parseInt(serverPort));
+                    sendLocationToUDPSocket(client_socket, IPAddress, Integer.parseInt(serverPort), id);
                 } catch (SocketException e) {
                     e.printStackTrace();
                 } catch (UnknownHostException e) {
@@ -343,7 +356,7 @@ public class MainActivity extends AppCompatActivity implements
                     public void run() {
 
                         resultsTextView.setText("");
-                        resultsTextView.append("Creando conexión TCP al Servidor: " + serverIP+":"+serverPort + "\n");
+                        resultsTextView.append("Creando conexión TCP al Servidor: " + serverIP+":"+serverPort + " (Thread ID: "+ id +")"+"\n");
 
 
                     }
@@ -361,7 +374,7 @@ public class MainActivity extends AppCompatActivity implements
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                resultsTextView.append("Enviando Hello al servidor \n");
+                                resultsTextView.append("Enviando Hello al servidor (Thread ID: "+ id +")"+"\n");
                             }
                         });
 
@@ -376,7 +389,7 @@ public class MainActivity extends AppCompatActivity implements
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                resultsTextView.append("Recibiendo HelloBack del Servidor \n");
+                                resultsTextView.append("Recibiendo HelloBack del Servidor (Thread ID: "+ id +")"+"\n");
                             }
                         });
 
@@ -384,17 +397,17 @@ public class MainActivity extends AppCompatActivity implements
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    resultsTextView.append("Preparando envio de localización del dispositivo \n");
+                                    resultsTextView.append("Preparando envio de localización del dispositivo (Thread ID: "+ id +")"+"\n");
                                 }
                             });
 
-                           sendLocationToPrintWriter(out);
+                           sendLocationToPrintWriter(out, id);
 
                         } else {
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    resultsTextView.append("No se obtuvo HelloBack, cerrando conexión \n");
+                                    resultsTextView.append("No se obtuvo HelloBack, cerrando conexión (Thread ID: "+ id +")"+"\n");
                                 }
                             });
 
