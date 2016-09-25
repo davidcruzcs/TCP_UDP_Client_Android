@@ -48,6 +48,8 @@ public class MainActivity extends AppCompatActivity implements
     public String connectionMode = "TCP";
 
     private Socket socket;
+    private DatagramSocket client_socket;
+    public int currentDatagramPort = 0;
 
     public String serverIP = "NONE";
     public String serverPort = "NONE";
@@ -334,7 +336,20 @@ public class MainActivity extends AppCompatActivity implements
                 });
 
                 try {
-                    DatagramSocket client_socket = new DatagramSocket(Integer.parseInt(serverPort));
+
+                    if (currentDatagramPort == 0) {
+
+                        client_socket = new DatagramSocket(Integer.parseInt(serverPort));
+                        currentDatagramPort = Integer.parseInt(serverPort);
+                    } else {
+                        if (Integer.parseInt(serverPort) != currentDatagramPort) {
+
+                            currentDatagramPort = Integer.parseInt(serverPort);
+                            client_socket.close();
+                            client_socket = new DatagramSocket(Integer.parseInt(serverPort));
+                        }
+                    }
+
                     InetAddress IPAddress = InetAddress.getByName(serverIP);
                     runOnUiThread(new Runnable() {
                         @Override
