@@ -1,4 +1,4 @@
-package com.example.juandavidcruz.tcp_udp_android_client;
+package com.juandavidcruz.tcp_udp_android_client;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;
